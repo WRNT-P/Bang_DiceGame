@@ -2,6 +2,7 @@
 characters.py — Character data and special abilities
 
 char_key must match CHAR_FILES in gui/constants.py
+All abilities are based on Bang! The Dice Game (base game) official rules.
 """
 from __future__ import annotations
 from typing import TYPE_CHECKING
@@ -21,22 +22,45 @@ if TYPE_CHECKING:
 #    "ability"  : str  — คำอธิบาย special power (ภาษาอังกฤษ)
 # ─────────────────────────────────────────────────────────────────────────────
 CHARACTER_STATS: dict[str, dict] = {
-    "bartC":       {"display": "Bart Cassidy",    "hp_bonus": 0, "ability": "Each time he loses a life point, he immediately rolls one die."},
-    "blackJ":      {"display": "Black Jack",      "hp_bonus": 0, "ability": "If two dice show the same face, he rolls one extra die."},
-    "calamityJ":   {"display": "Calamity Janet", "hp_bonus": 0, "ability": "She can use Bang! as Beer and Beer as Bang!"},
-    "elG":         {"display": "El Gringo",       "hp_bonus": 0, "ability": "Each time he loses a life point, he steals an arrow from the shooter."},
-    "jesseJ":      {"display": "Jesse Jones",     "hp_bonus": 0, "ability": "If he shoots the Sheriff, he gains 1 Beer."},
-    "jourdonnais":  {"display": "Jourdonnais",    "hp_bonus": 1, "ability": "He has 1 extra life point."},
-    "kitC":        {"display": "Kit Carlson",     "hp_bonus": 0, "ability": "Before rolling, he looks at 3 dice and keeps 1 before the roll."},
-    "luckyD":      {"display": "Lucky Duke",      "hp_bonus": 0, "ability": "He rolls dice twice and chooses the better result."},
-    "paulR":       {"display": "Paul Regret",     "hp_bonus": 0, "ability": "Arrows have no effect on him."},
-    "pedroR":      {"display": "Pedro Ramirez",   "hp_bonus": 0, "ability": "At the start of his turn, if he has arrows, he returns 1 and heals 1 HP."},
-    "roseD":       {"display": "Rose Doolan",     "hp_bonus": 0, "ability": "She can shoot the next 2 players instead of just 1."},
-    "sidK":        {"display": "Sid Ketchum",     "hp_bonus": 0, "ability": "He needs 2 Beer results to heal 1 HP."},
-    "slabTK":      {"display": "Slab the Killer", "hp_bonus": 0, "ability": "Each Bang! he rolls deals 2 damage instead of 1."},
-    "suzyL":       {"display": "Suzy Lafayette",  "hp_bonus": 0, "ability": "If she rolls no Bang! at all, she heals 1 HP."},
-    "vultureS":    {"display": "Vulture Sam",     "hp_bonus": 0, "ability": "Each time a player is eliminated, he gains 2 Beer."},
-    "willyTK":     {"display": "Willy the Kid",   "hp_bonus": 0, "ability": "He can roll dice an unlimited number of times per turn."},
+    # ── ตัวละครที่มีใน Bang! The Dice Game (base game) ──────────────────────
+    "bartC":      {"display": "Bart Cassidy",    "hp_bonus": 0,
+                   "ability": "Each time he loses a life point, he may take an arrow instead (except from Indians or Dynamite). Cannot use if it's the last arrow."},
+
+    "blackJ":     {"display": "Black Jack",      "hp_bonus": 0,
+                   "ability": "He may re-roll the dice one extra time per turn (4 total rolls). Cannot use if 3+ Dynamite are showing."},
+
+    "calamityJ":  {"display": "Calamity Janet",  "hp_bonus": 0,
+                   "ability": "She may use Bang! results as Beer and Beer results as Bang!"},
+
+    "jesseJ":     {"display": "Jesse Jones",     "hp_bonus": 0,
+                   "ability": "Once per turn, he may use a Bang! die to double another Bang! or Gatling result, dealing 2 damage to the same target."},
+
+    "jourdonnais": {"display": "Jourdonnais",    "hp_bonus": 0,
+                    "ability": "He never loses more than 1 life point from an Indian attack."},
+
+    "kitC":       {"display": "Kit Carlson",     "hp_bonus": 0,
+                   "ability": "His Bang! and Gatling Gun reach one extra player further than usual."},
+
+    "luckyD":     {"display": "Lucky Duke",      "hp_bonus": 0,
+                   "ability": "He may re-roll the dice one extra time per turn (4 total rolls)."},
+
+    "paulR":      {"display": "Paul Regret",     "hp_bonus": 0,
+                   "ability": "Arrows have no effect on him."},
+
+    "pedroR":     {"display": "Pedro Ramirez",   "hp_bonus": 0,
+                   "ability": "Each time he loses a life point, he may discard one of his arrows instead."},
+
+    "slabTK":     {"display": "Slab the Killer", "hp_bonus": 0,
+                   "ability": "Once per turn, he may use a Beer die to double a Bang! result, dealing 2 damage to the same target. The Beer die does not heal."},
+
+    "suzyL":      {"display": "Suzy Lafayette",  "hp_bonus": 0,
+                   "ability": "If she does not roll any Bang! symbols at the end of her turn, she gains 2 life points."},
+
+    "vultureS":   {"display": "Vulture Sam",     "hp_bonus": 0,
+                   "ability": "Each time another player is eliminated, he gains 2 life points."},
+
+    "willyTK":    {"display": "Willy the Kid",   "hp_bonus": 0,
+                   "ability": "He can trigger the Gatling Gun with only 2 Gatling symbols (instead of 3). Can only trigger once per turn."},
 }
 
 
@@ -52,7 +76,8 @@ CHARACTER_STATS: dict[str, dict] = {
 #  Returns:
 #    int  — hp_max ที่ควรตั้งให้ Player
 # ─────────────────────────────────────────────────────────────────────────────
-# ตาราง BASE_HP ตาม roles.py (import ตรงนี้จะ circular ดังนั้น copy ค่ามาใช้)
+# ตาราง BASE_HP ตาม roles.py
+# (ไม่ import roles.py เพื่อหลีกเลี่ยง circular import)
 _BASE_HP: dict[int, dict[str, int]] = {
     2: {"Sheriff": 2, "Deputy": 1, "Outlaw": 1, "Renegade": 1},
     3: {"Sheriff": 3, "Deputy": 2, "Outlaw": 2, "Renegade": 2},
@@ -82,57 +107,60 @@ def get_hp_for_character(char_key: str, role: str, num_players: int) -> int:
 #  Args:
 #    player : Player  — ผู้เล่นที่ใช้ ability
 #    event  : str     — ชื่อ event:
-#                         "on_take_damage"  — เมื่อเสีย HP
-#                         "on_kill"         — เมื่อผู้เล่นอื่นตาย
-#                         "on_roll_start"   — ก่อนเริ่ม roll
-#                         "on_roll_end"     — หลัง roll รอบนั้นจบ
+#                         "on_take_damage"    — เมื่อเสีย HP (จาก Bang!/Gatling)
+#                         "on_take_indian"    — เมื่อโดน Indian attack
+#                         "on_kill"           — เมื่อผู้เล่นอื่นตาย
+#                         "on_turn_end"       — หลัง resolve dice ครบ (ก่อนส่งเทิร์น)
 #    game   : Game    — object ของเกม
 #  Returns:
 #    dict | None  — ผลของ ability (None = ไม่มี ability สำหรับ event นี้)
 #
 #  รูปแบบ dict ที่ return ได้:
-#    {"extra_roll": int}      — สุ่มลูกเต๋าเพิ่ม n ลูก
-#    {"steal_arrow": True}    — ขโมย arrow จากคนที่ยิง (game จะ resolve เอง)
-#    {"gain_beer": int}       — รับ beer n ใบ (heal n HP)
-#    {"immune_arrow": True}   — ไม่รับ arrow
-#    {"heal": int}            — heal n HP ทันที
+#    {"take_arrow_instead": True}  — รับ arrow แทนเสีย HP (Bart Cassidy)
+#    {"gain_hp": int}              — รับ HP ทันที
+#    {"discard_arrow": int}        — คืน arrow n ลูกแทนเสีย HP (Pedro)
+#    {"immune_arrow": True}        — ไม่รับ arrow (Paul Regret)
+#    {"cap_indian_damage": int}    — จำกัด damage จาก Indians (Jourdonnais)
 # ─────────────────────────────────────────────────────────────────────────────
 def apply_special(player: "Player", event: str, game: "Game") -> dict | None:
     key = player.char_key
 
-    # ── on_take_damage ── เรียกทุกครั้งที่ player เสีย HP
+    # ── on_take_damage ── เรียกเมื่อ player โดน Bang! หรือ Gatling
     if event == "on_take_damage":
         if key == "bartC":
-            # Bart Cassidy: สุ่มลูกเต๋าเพิ่ม 1 ลูกทันที
-            return {"extra_roll": 1}
-        if key == "elG":
-            # El Gringo: ขโมย arrow 1 ลูกจากคนที่ยิงมา
-            return {"steal_arrow": True}
+            # Bart Cassidy: รับ arrow แทนเสีย HP
+            # (game.py ต้องตรวจว่า arrow pile ไม่ว่างก่อนใช้ ability นี้)
+            return {"take_arrow_instead": True}
+
+        if key == "pedroR":
+            # Pedro Ramirez: discard arrow 1 ลูกแทนเสีย HP
+            if player.arrows > 0:
+                return {"discard_arrow": 1}
+
+    # ── on_take_indian ── เรียกเมื่อ Indian attack resolve (ไม่ใช่ Dynamite)
+    elif event == "on_take_indian":
+        if key == "jourdonnais":
+            # Jourdonnais: เสีย HP จาก Indians ได้สูงสุด 1 เสมอ
+            return {"cap_indian_damage": 1}
+
+        if key == "paulR":
+            # Paul Regret: immune arrow ทั้งหมด (ไม่รับ arrow เลย)
+            return {"immune_arrow": True}
 
     # ── on_kill ── เรียกเมื่อมีผู้เล่นถูกกำจัดออกจากเกม
     elif event == "on_kill":
         if key == "vultureS":
-            # Vulture Sam: รับ Beer 2 (heal 2 HP) ทุกครั้งที่มีคนตาย
-            return {"gain_beer": 2}
+            # Vulture Sam: รับ 2 HP ทุกครั้งที่มีคนตาย
+            return {"gain_hp": 2}
 
-    # ── on_roll_start ── เรียกก่อน player เริ่ม roll ลูกเต๋ารอบใหม่
-    elif event == "on_roll_start":
-        if key == "paulR":
-            # Paul Regret: ได้รับ immunity จาก arrow ในเทิร์นนี้
-            return {"immune_arrow": True}
-        if key == "pedroR":
-            # Pedro Ramirez: ถ้ามี arrow อยู่ → คืน 1 ลูก + heal 1 HP
-            if player.arrows > 0:
-                return {"return_arrow": 1, "heal": 1}
-
-    # ── on_roll_end ── เรียกหลัง roll รอบนั้นจบ (ก่อนตัดสินผล)
-    elif event == "on_roll_end":
+    # ── on_turn_end ── เรียกหลัง resolve dice ทั้งหมด ก่อนส่งเทิร์น
+    elif event == "on_turn_end":
         if key == "suzyL":
-            # Suzy Lafayette: ถ้า roll ไม่ออก Bang! เลยในรอบนี้ → heal 1 HP
-            # game ต้องส่ง context "bang_count" มาด้วย (ดูใน game.py)
-            bang_count = getattr(game, "_last_bang_count", 0)
+            # Suzy Lafayette: ถ้าไม่ roll Bang! เลยในเทิร์นนี้ → gain 2 HP
+            # game.py ต้องเก็บ _turn_bang_count ไว้
+            bang_count = getattr(game, "_turn_bang_count", 0)
             if bang_count == 0:
-                return {"heal": 1}
+                return {"gain_hp": 2}
 
     # ไม่มี ability สำหรับ event นี้
     return None
