@@ -34,10 +34,10 @@ BASE_HP: dict[int, dict[str, int]] = {
 #  WIN_CONDITIONS  — เงื่อนไขชนะของแต่ละ role (ใช้แสดงผลใน Result screen)
 # ─────────────────────────────────────────────────────────────────────────────
 WIN_CONDITIONS: dict[str, str] = {
-    "Sheriff":  "Eliminate all Outlaws and the Renegade.",
-    "Deputy":   "Keep the Sheriff alive until the end.",
-    "Outlaw":   "Eliminate the Sheriff.",
-    "Renegade": "Be the last player standing.",
+    "Sheriff":  "กำจัด Outlaw และ Renegade ทั้งหมด",
+    "Deputy":   "ช่วย Sheriff ให้รอดชีวิต",
+    "Outlaw":   "กำจัด Sheriff",
+    "Renegade": "เหลือคนสุดท้ายในเกม",
 }
 
 
@@ -61,33 +61,4 @@ WIN_CONDITIONS: dict[str, str] = {
 #    8 คน : 1 Sheriff, 2 Deputy, 3 Outlaw, 2 Renegade
 # ─────────────────────────────────────────────────────────────────────────────
 def assign_roles(players: list[Player]) -> None:
-    import random
-    from .characters import get_hp_for_character
-
-    n = len(players)
-
-    # ── สร้าง role pool ตามจำนวนผู้เล่น ──────────────────────────────────────
-    role_pool: list[str]
-    if n == 2:
-        role_pool = ["Sheriff", "Renegade"]
-    elif n == 3:
-        role_pool = ["Sheriff", "Outlaw", "Renegade"]
-    elif n == 4:
-        role_pool = ["Sheriff", "Deputy", "Outlaw", "Outlaw"]
-    elif n == 5:
-        role_pool = ["Sheriff", "Deputy", "Outlaw", "Outlaw", "Renegade"]
-    elif n == 6:
-        role_pool = ["Sheriff", "Deputy", "Outlaw", "Outlaw", "Outlaw", "Renegade"]
-    elif n == 7:
-        role_pool = ["Sheriff", "Deputy", "Deputy", "Outlaw", "Outlaw", "Outlaw", "Renegade"]
-    else:  # 8 players
-        role_pool = ["Sheriff", "Deputy", "Deputy", "Outlaw", "Outlaw", "Outlaw", "Renegade", "Renegade"]
-
-    random.shuffle(role_pool)
-
-    # ── แจก role + ตั้ง hp_max ให้ผู้เล่นแต่ละคน ─────────────────────────────
-    for player, role in zip(players, role_pool):
-        player.role   = role
-        hp_max        = get_hp_for_character(player.char_key, role, n)
-        player.hp_max = hp_max
-        player.hp     = hp_max  # เริ่มเต็ม
+    pass  # TODO: implement
