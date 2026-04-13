@@ -40,9 +40,13 @@ ALL_FACES: list[str] = [
 #  Returns:
 #    list[str]  — face ใหม่ทั้ง 5 ตัว
 # ─────────────────────────────────────────────────────────────────────────────
-def roll_dice(current_faces: list[str], locked_indices: list[int]) -> list[str]:
-    pass  # TODO: implement
 
+def roll_dice(current_faces: list[str], locked_indices: list[int]) -> list[str]:
+    result = list(current_faces)  # copy ค่าเดิมไว้ก่อน
+    for i in range(len(result)):
+        if i not in locked_indices:
+            result[i] = random.choice(ALL_FACES)
+    return result
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  apply_dice_results(faces) -> dict
@@ -52,10 +56,32 @@ def roll_dice(current_faces: list[str], locked_indices: list[int]) -> list[str]:
 #  Returns:
 #    dict ที่มี key:
 #      "arrows"    : int  — จำนวนลูกศร
-#      "bangs"     : int  — จำนวน bang รวม (bang2 นับ 2)
+#      "bang1"     : int  — จำนวน bang ธรรมดา (ยิงระยะ 1)
+#      "bang2"     : int  — จำนวน double-bang (ยิงระยะ 1 และ 2)
 #      "beers"     : int  — จำนวน beer
 #      "dynamites" : int  — จำนวน dynamite
 #      "gatlings"  : int  — จำนวน gatling
 # ─────────────────────────────────────────────────────────────────────────────
 def apply_dice_results(faces: list[str]) -> dict:
-    pass  # TODO: implement
+    results = {
+        "arrows":    0,
+        "bang1":     0,
+        "bang2":     0,
+        "beers":     0,
+        "dynamites": 0,
+        "gatlings":  0,
+    }
+    for face in faces:
+        if face == DiceFace.ARROW:
+            results["arrows"]    += 1
+        elif face == DiceFace.BANG:
+            results["bang1"]     += 1
+        elif face == DiceFace.DOUBLE_BANG:
+            results["bang2"]     += 1
+        elif face == DiceFace.BEER:
+            results["beers"]     += 1
+        elif face == DiceFace.DYNAMITE:
+            results["dynamites"] += 1
+        elif face == DiceFace.GATLING:
+            results["gatlings"]  += 1
+    return results

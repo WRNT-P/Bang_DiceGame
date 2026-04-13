@@ -81,5 +81,4 @@ def assign_roles(players: list[Player]) -> None:
     random.shuffle(pool)
     for i, player in enumerate(players):
         player.role = pool[i]
-        player.hp_max = BASE_HP[n][player.role]
-        player.hp = player.hp_max
+        #บรรทัดที่เกี่ยวกับ HP ทิ้งไป ปล่อยให้ Game เป็นคนจัดการ
