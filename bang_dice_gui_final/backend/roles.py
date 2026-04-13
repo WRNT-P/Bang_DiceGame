@@ -2,7 +2,7 @@
 roles.py — Role definitions, HP tables, win conditions, and role assignment
 """
 from .player import Player
-
+import random
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  ROLES  — บทบาทที่มีในเกม (ตรงกับ ROLES ใน gui/constants.py)
@@ -60,5 +60,26 @@ WIN_CONDITIONS: dict[str, str] = {
 #    7 คน : 1 Sheriff, 2 Deputy, 3 Outlaw, 1 Renegade
 #    8 คน : 1 Sheriff, 2 Deputy, 3 Outlaw, 2 Renegade
 # ─────────────────────────────────────────────────────────────────────────────
+
 def assign_roles(players: list[Player]) -> None:
-    pass  # TODO: implement
+    n = len(players)
+    if n == 2:
+        pool = ["Sheriff", "Renegade"]
+    elif n == 3:
+        pool = ["Sheriff", "Renegade", "Outlaw"]
+    elif n == 4:
+        pool = ["Sheriff", "Renegade", "Outlaw", "Outlaw"]
+    elif n == 5:
+        pool = ["Sheriff", "Renegade", "Outlaw", "Outlaw", "Deputy"]
+    elif n == 6:
+        pool = ["Sheriff", "Renegade", "Outlaw", "Outlaw", "Outlaw", "Deputy"]
+    elif n == 7:
+        pool = ["Sheriff", "Renegade", "Outlaw", "Outlaw", "Outlaw", "Deputy", "Deputy"]
+    elif n == 8:
+        pool = ["Sheriff", "Renegade", "Renegade", "Outlaw", "Outlaw", "Outlaw", "Deputy", "Deputy"]
+    
+    random.shuffle(pool)
+    for i, player in enumerate(players):
+        player.role = pool[i]
+        player.hp_max = BASE_HP[n][player.role]
+        player.hp = player.hp_max
