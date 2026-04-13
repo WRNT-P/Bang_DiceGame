@@ -36,25 +36,29 @@ class Player:
     #  take_damage(amount)  — ลด HP, ถ้า <= 0 ให้ตั้ง alive = False
     # ─────────────────────────────────────────────────────────────────────────
     def take_damage(self, amount: int) -> None:
-        pass  # TODO: implement
-
+        self.hp -= amount
+        if self.hp <= 0:
+            self.hp = 0
+            self.alive = False
     # ─────────────────────────────────────────────────────────────────────────
     #  heal(amount)  — เพิ่ม HP แต่ไม่เกิน hp_max
     # ─────────────────────────────────────────────────────────────────────────
     def heal(self, amount: int) -> None:
-        pass  # TODO: implement
+        self.hp += amount
+        if self.hp > self.hp_max:
+            self.hp = self.hp_max
 
     # ─────────────────────────────────────────────────────────────────────────
     #  add_arrows(amount)  — เพิ่ม arrow ที่ถืออยู่
     # ─────────────────────────────────────────────────────────────────────────
     def add_arrows(self, amount: int) -> None:
-        pass  # TODO: implement
+        self.arrows += amount
 
     # ─────────────────────────────────────────────────────────────────────────
     #  clear_arrows()  — คืน arrow ทั้งหมดกลับ pile (ตั้งเป็น 0)
     # ─────────────────────────────────────────────────────────────────────────
     def clear_arrows(self) -> None:
-        pass  # TODO: implement
+        self.arrows = 0
 
     def __repr__(self) -> str:
         return (f"Player({self.name!r}, char={self.char_key!r}, "
