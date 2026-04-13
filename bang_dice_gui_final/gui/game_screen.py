@@ -22,6 +22,7 @@ from .constants import (
     get_font, load_image, draw_text, draw_panel, draw_star
 )
 from .button import Button
+from backend import Game
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -349,8 +350,8 @@ class GameScreen:
 
         # Assign HP variation for visual interest
         for i, token in enumerate(self._tokens):
-            token.hp_max = random.randint(3, 5)
-            token.hp     = token.hp_max
+            token.hp_max = players_state[i]["hp_max"]
+            token.hp     = players_state[i]["hp"]
 
     def _build_dice(self):
         """Place 5 dice in a horizontal row."""
@@ -388,28 +389,15 @@ class GameScreen:
     # ── Scene interface ──────────────────────────────────────────────────────
     def on_enter(self, data: dict):
         self._t = 0
-        num    = data.get("num_players", 4)
-        chars  = data.get("char_keys", random.sample(CHAR_FILES, num))
-        self._build_tokens(num, chars)
+        num   = data.get("num_players", 4)
+        chars = data.get("char_keys", random.sample(CHAR_FILES, num))
+        self._game = Game(num, chars)
+        state = self._game.get_state()
+        self._build_tokens(num, chars, state["players"])
         self._build_dice()
-        self._current_idx = 0
-        self._arrow_count = 0
+        self._current_idx = state["current_player_idx"]
+        self._arrow_count = state["arrow_pile"]
         self._turn_anim_t = 0
-
-    def handle_event(self, event: pygame.event.Event):
-        if self._btn_menu.is_clicked(event):
-            self.manager.set_scene("menu")
-        if self._btn_result.is_clicked(event):
-            self.manager.set_scene("result")
-        if self._btn_roll.is_clicked(event):
-            self._do_roll()
-        if self._btn_end.is_clicked(event):
-            self._next_turn()
-
-        # Die click to lock/unlock
-        for die in self._dice:
-            if die.is_clicked(event):
-                die.toggle_lock()
 
     def update(self):
         self._t += 1
@@ -568,7 +556,6 @@ class GameScreen:
             if btn_del_arr.collidepoint(event.pos):
                 self._arrow_count = max(0, self._arrow_count - 1)
 
-    # Override handle_event to include arrow buttons
     def handle_event(self, event: pygame.event.Event):
         if self._btn_menu.is_clicked(event):
             self.manager.set_scene("menu")

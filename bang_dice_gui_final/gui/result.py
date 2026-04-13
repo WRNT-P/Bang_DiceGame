@@ -176,41 +176,64 @@ class ResultScreen:
             "⌂  MAIN MENU", font_size=24)
 
     # ── helpers ─────────────────────────────────────────────────────────────
-    def _build_cards(self, num: int, char_keys: list):
-        """Layout role cards in a horizontal row."""
-        n   = min(num, len(char_keys))
+    def _build_cards(self, players: list, winner_char: str, winner_role: str):
+        """Layout role cards in a horizontal row using real game data.
+
+        Args:
+            players:      list of dicts with keys 'char_key' and 'role',
+                          as returned by Game.get_state()['players'].
+            winner_char:  char_key of the winning player.
+            winner_role:  role string of the winning player.
+        """
+        n   = len(players)
         cw, ch = RoleCard.CARD_W, RoleCard.CARD_H
         pad = 22
         total = n * cw + (n - 1) * pad
         sx  = (SCREEN_W - total) // 2
         y   = SCREEN_H - ch - 100
 
-        # Assign roles: first player = Sheriff, rest random
-        roles = [ROLES[0]]
-        others = ROLES[1:]
-        for i in range(1, n):
-            roles.append(others[i % len(others)])
-        random.shuffle(roles[1:])
-
         self._cards = []
-        for i in range(n):
+        for i, player in enumerate(players):
             rect = pygame.Rect(sx + i * (cw + pad), y, cw, ch)
-            card = RoleCard(i, char_keys[i], roles[i], rect)
+            card = RoleCard(i, player["char_key"], player["role"], rect)
             self._cards.append(card)
 
-        # Winner = Sheriff
-        self._winner_char = char_keys[0]
-        self._winner_role = "Sheriff"
-        port_path = os.path.join(CHARS_DIR, f"{char_keys[0]}.jpg")
+        # Winner data from real game result
+        self._winner_char = winner_char
+        self._winner_role = winner_role
+        port_path = os.path.join(CHARS_DIR, f"{winner_char}.jpg")
         self._winner_port = load_image(port_path, (110, 110))
 
     # ── Scene interface ──────────────────────────────────────────────────────
     def on_enter(self, data: dict):
+        """
+        Expected keys in data (sent by game_screen on end-game):
+            players      – list of dicts: [{"char_key": str, "role": str}, ...]
+            winner_char  – char_key of the winning player
+            winner_role  – role string of the winning player
+
+        Fallback to dummy data when called without a real game (e.g. direct
+        navigation from the menu during development).
+        """
         self._t = 0
-        num    = data.get("num_players", 4)
-        chars  = data.get("char_keys",
-                          random.sample(CHAR_FILES, min(num, len(CHAR_FILES))))
-        self._build_cards(num, chars)
+
+        players     = data.get("players")
+        winner_char = data.get("winner_char", "")
+        winner_role = data.get("winner_role", "")
+
+        # Fallback: build placeholder data so the screen does not crash
+        if not players:
+            num    = data.get("num_players", 4)
+            chars  = data.get("char_keys",
+                              random.sample(CHAR_FILES, min(num, len(CHAR_FILES))))
+            roles  = [ROLES[0]] + [ROLES[1 + i % (len(ROLES) - 1)]
+                                   for i in range(len(chars) - 1)]
+            players     = [{"char_key": c, "role": r}
+                           for c, r in zip(chars, roles)]
+            winner_char = winner_char or chars[0]
+            winner_role = winner_role or ROLES[0]
+
+        self._build_cards(players, winner_char, winner_role)
         for c in self._confetti:
             c.reset(initial=False)
 
