@@ -15,7 +15,7 @@ from .constants import (
     get_font, load_image, draw_text, draw_panel, draw_star
 )
 from .button import Button
-
+from bang_dice_gui_final import GameRecord, PlayerResult, StorageManager
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Confetti particle
@@ -175,6 +175,25 @@ class ResultScreen:
             pygame.Rect(cx + 20, SCREEN_H - 74, bw2, bh2),
             "⌂  MAIN MENU", font_size=24)
 
+    def save_result(self, winner_role):
+        player_results = []
+
+        for p in self.players:
+            player_results.append(
+                PlayerResult(
+                    name=p["char_key"],
+                    role=p["role"],
+                    is_winner=(p["role"] == winner_role)
+                )
+            )
+
+        record = GameRecord.create(
+            winner_role=winner_role,
+            players=player_results
+        )
+
+        StorageManager().save_game(record)
+
     # ── helpers ─────────────────────────────────────────────────────────────
     def _build_cards(self, players: list, winner_char: str, winner_role: str):
         """Layout role cards in a horizontal row using real game data.
@@ -234,6 +253,10 @@ class ResultScreen:
             winner_role = winner_role or ROLES[0]
 
         self._build_cards(players, winner_char, winner_role)
+
+        self.players = players   # (สำคัญ!)
+        self.save_result(winner_role)
+
         for c in self._confetti:
             c.reset(initial=False)
 
