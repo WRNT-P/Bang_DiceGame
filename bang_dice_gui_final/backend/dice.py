@@ -44,6 +44,10 @@ ALL_FACES: list[str] = [
 def roll_dice(current_faces: list[str], locked_indices: list[int]) -> list[str]:
     result = list(current_faces)  # copy ค่าเดิมไว้ก่อน
     for i in range(len(result)):
+        # บังคับล็อคถ้าหน้าเดิมเป็น DYNAMITE
+        if current_faces[i] == DiceFace.DYNAMITE:
+            continue
+            
         if i not in locked_indices:
             result[i] = random.choice(ALL_FACES)
     return result

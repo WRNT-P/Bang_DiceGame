@@ -15,7 +15,8 @@ from .constants import (
     get_font, load_image, draw_text, draw_panel, draw_star
 )
 from .button import Button
-from bang_dice_gui_final import GameRecord, PlayerResult, StorageManager
+from models import GameRecord, PlayerResult
+from manager import StorageManager
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Confetti particle
@@ -179,11 +180,17 @@ class ResultScreen:
         player_results = []
 
         for p in self.players:
+            won = (p.get("role") == winner_role) or (winner_role == "Sheriff" and p.get("role") == "Deputy")
             player_results.append(
                 PlayerResult(
-                    name=p["char_key"],
-                    role=p["role"],
-                    is_winner=(p["role"] == winner_role)
+                    name=p.get("name", p.get("char_key", "Unknown")),
+                    char_key=p.get("char_key", "unknown"),
+                    role=p.get("role", "Unknown"),
+                    hp_final=p.get("hp", 0),
+                    hp_max=p.get("hp_max", max(1, p.get("hp", 0))),
+                    arrows_held=p.get("arrows", 0),
+                    survived=p.get("alive", False),
+                    won=won
                 )
             )
 

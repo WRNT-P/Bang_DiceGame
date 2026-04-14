@@ -10,7 +10,7 @@ storage/__init__.py — Public API ของ storage module
     stats   = db.get_player_stats("Player 1")
 """
 
-from .models  import GameRecord, PlayerResult
-from .manager import StorageManager
+from models  import GameRecord, PlayerResult
+from manager import StorageManager
 
 __all__ = ["GameRecord", "PlayerResult", "StorageManager"]

@@ -67,6 +67,8 @@ class Game:
     #  Called by GUI on "ROLL DICE".
     # ------------------------------------------------------------------
     def roll(self, locked_indices: list[int]) -> list[str]:  # Bug #1 fix: correct indent (was top-level)
+        if self.roll_count == 3:
+            return self.dice_faces
         self.roll_count += 1                                  # Bug #5 fix: increment roll counter
         self.dice_faces = roll_dice(self.dice_faces, locked_indices)
         return self.dice_faces
@@ -85,11 +87,13 @@ class Game:
         cp.dynamites = results.get("dynamites", 0)
 
         # 1. Dynamite: 3+ faces = instant death
+        print("Step1 Execute")
         if cp.dynamites >= 3:
             cp.take_damage(cp.hp)
             events.append("Dynamite! You died.")
 
         # 2. Arrow
+        print("Step2 Execute")
         arrows_taken = min(results["arrows"], self.arrow_pile)  # Bug #3 fix: arrrow -> arrow
         cp.add_arrows(arrows_taken)
         self.arrow_pile -= arrows_taken
@@ -109,47 +113,55 @@ class Game:
             events.append("Indian Attack!")
 
         # 3. Gatling
-        special = apply_special(cp, "on_gatling_check", self)
-        gatling_threshold = special["gatling_threshold"] if special else 3
-        if results["gatlings"] >= gatling_threshold:
-            self._last_gatling_count = results["gatlings"]
-            for p in self.alive_players:
-                if p == cp:
-                    continue
-                sp = apply_special(p, "on_take_gatling", self)
-                if sp and sp.get("immune_gatling"):
-                    continue
-                dmg = 1                                         # Bug #7 fix: Gatling deals 1 dmg, not p.arrows
-                p.take_damage(dmg)
-            for p in self.alive_players:
-                p.clear_arrows()
-            self.arrow_pile = self.ARROW_TOTAL
-            events.append("Gatling!")
+        print("Step3 Execute")
+        if cp.alive:
+            special = apply_special(cp, "on_gatling_check", self)
+            gatling_threshold = special["gatling_threshold"] if special else 3
+            if results["gatlings"] >= gatling_threshold:
+                events.append("Gatling!")
+                for p in self.alive_players:
+                    if p == cp:
+                        continue
+                    sp = apply_special(p, "on_take_gatling", self)
+                    if sp and sp.get("immune_gatling"):
+                        continue
+                    dmg = 1                                         # Bug #7 fix: Gatling deals 1 dmg, not p.arrows
+                    p.take_damage(dmg)
+                for p in self.alive_players:
+                    p.clear_arrows()
+                self.arrow_pile = self.ARROW_TOTAL
 
         # 4. Beer
-        for _ in range(results["beers"]):
-            sp = apply_special(cp, "on_beer_use", self)
-            heal_amt = sp["heal_amount"] if sp else 1
-            cp.heal(heal_amt)
-        if results["beers"] > 0:
-            events.append(f"Beer x{results['beers']}")
+        print("Step4 Execute")
+        if cp.alive:
+            for _ in range(results["beers"]):
+                sp = apply_special(cp, "on_beer_use", self)
+                heal_amt = sp["heal_amount"] if sp else 1
+                cp.heal(heal_amt)
+
+            if results["beers"] > 0:
+                events.append(f"Beer x{results['beers']}")
 
         # 5. Bang
-        alive = self.alive_players
-        if len(alive) > 1:
-            target = alive[(alive.index(cp) + 1) % len(alive)]
-            total_bang = results["bang1"] + results["bang2"] * 2
-            if total_bang > 0:
-                target.take_damage(total_bang)
-                events.append(f"Bang! {target.name} -HP")
+        print("Step5 Execute")
+        if cp.alive:
+            alive = self.alive_players
+            if len(alive) > 1:
+                target = alive[(alive.index(cp) + 1) % len(alive)]
+                total_bang = results["bang1"] + results.get("bang2", 0) * 2
+                if total_bang > 0:
+                    target.take_damage(total_bang)
+                    events.append(f"Bang! {target.name} -HP")
 
         # 6. Check win condition
+        print("Step6 Execute")
         winner = self.check_win()
         if winner:
             self.is_game_over = True
             self.winner_role = winner
 
         # 7. Advance to next living player
+        print("Step7 Execute")
         next_idx = self.current_player_idx
         for _ in range(len(self.players)):
             next_idx = (next_idx + 1) % len(self.players)
@@ -158,6 +170,7 @@ class Game:
         self.current_player_idx = next_idx
 
         # Reset for next turn
+        print("Step8 Execute")
         self.roll_count = 0
         self.locked_indices = []
         self.dice_faces = ["arrow"] * 5

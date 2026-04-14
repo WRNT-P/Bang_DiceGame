@@ -17,7 +17,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from .models import GameRecord, PlayerResult
+from models import GameRecord, PlayerResult
 
 
 # ─────────────────────────────────────────────────────────────────────────────

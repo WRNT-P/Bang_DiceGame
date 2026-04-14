@@ -22,7 +22,8 @@ def example_save_after_game():
             ...
         }
     """
-    from storage import GameRecord, PlayerResult, StorageManager
+    from models import GameRecord, PlayerResult
+    from manager import StorageManager
 
     # ── รับ game_state จาก GUI (ค่า mock สำหรับตัวอย่าง) ──
     game_state = {
@@ -76,7 +77,7 @@ def example_save_after_game():
 
 # ── ตัวอย่างที่ 2: โหลด history ──────────────────────────────────────────────
 def example_load_history():
-    from storage import StorageManager
+    from manager import StorageManager
 
     db = StorageManager()
     history = db.load_history(limit=5)   # 5 เกมล่าสุด
@@ -86,7 +87,7 @@ def example_load_history():
 
 # ── ตัวอย่างที่ 3: ดูสถิติผู้เล่น ──────────────────────────────────────────────
 def example_player_stats():
-    from storage import StorageManager
+    from manager import StorageManager
 
     db = StorageManager()
     stats = db.get_player_stats("Player 1")
@@ -97,7 +98,7 @@ def example_player_stats():
 
 # ── ตัวอย่างที่ 4: Leaderboard ────────────────────────────────────────────────
 def example_leaderboard():
-    from storage import StorageManager
+    from manager import StorageManager
 
     db = StorageManager()
     board = db.get_leaderboard(top_n=5)

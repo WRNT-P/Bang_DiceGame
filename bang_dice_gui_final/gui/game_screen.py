@@ -65,11 +65,11 @@ class Die:
                            self.cy - Die.SIZE // 2 + self._off_y,
                            Die.SIZE, Die.SIZE)
 
-    def start_shake(self):
+    def start_shake(self, new_face: str = None):
         if not self.locked:
             self._shake_t     = 28
             self._shake_total = 28
-            self.face         = random.choice(DICE_FACES)
+            self.face         = new_face if new_face else random.choice(DICE_FACES)
 
     def is_clicked(self, event: pygame.event.Event) -> bool:
         if (event.type == pygame.MOUSEBUTTONDOWN and
@@ -79,6 +79,9 @@ class Die:
         return False
 
     def toggle_lock(self):
+        # ไดนาไมต์ห้ามกดยกเลิกล็อค (กฎเกมของ Bang!)
+        if self.face == "dynamite":
+            return
         self.locked  = not self.locked
         self._lock_t = 0
 
@@ -93,6 +96,8 @@ class Die:
             self._off_x = int(random.uniform(-amp, amp))
             self._off_y = int(random.uniform(-amp * 0.5, amp * 0.5))
             self._shake_t -= 1
+            if self._shake_t == 0 and self.face == "dynamite":
+                self.locked = True
         else:
             self._off_x = self._off_y = 0
 
@@ -157,6 +162,7 @@ class PlayerToken:
         self.cx, self.cy = cx, cy
         self.is_current = is_current
         self.is_dead    = False
+        self.role       = ""  # เก็บ Role เพื่อเอาไปเช็คตอนวาด
         self._t         = 0
 
         img_path = os.path.join(CHARS_DIR, f"{char_key}.jpg")
@@ -217,8 +223,13 @@ class PlayerToken:
         surface.blit(self._portrait, (cx - r, cy - r))
 
         # Ring border
-        border_c = C_GOLD if self.is_current else C_GOLD_DIM
-        border_w = 4 if self.is_current else 2
+        if getattr(self, "role", "") == "Sheriff":
+            border_c = (255, 215, 0)  # สีเหลืองสดสว่างจ้าสำหรับนายอำเภอ (Sheriff)
+            border_w = 5 if self.is_current else 4
+        else:
+            border_c = C_GOLD if self.is_current else C_GOLD_DIM
+            border_w = 4 if self.is_current else 2
+            
         pygame.draw.circle(surface, border_c, (cx, cy), r, border_w)
 
         # Player number badge
@@ -331,7 +342,7 @@ class GameScreen:
             border_color=(200, 80, 180))
 
     # ── helpers ─────────────────────────────────────────────────────────────
-    def _build_tokens(self, num: int, char_keys: list):
+    def _build_tokens(self, num: int, char_keys: list, players_state: list):
         """Place player tokens in an elliptical ring around the table."""
         self._tokens = []
         # Ellipse params
@@ -348,10 +359,11 @@ class GameScreen:
             token  = PlayerToken(i, key, px, py, is_current=(i == 0))
             self._tokens.append(token)
 
-        # Assign HP variation for visual interest
+        # Assign Status from Backend
         for i, token in enumerate(self._tokens):
             token.hp_max = players_state[i]["hp_max"]
             token.hp     = players_state[i]["hp"]
+            token.role   = players_state[i]["role"]
 
     def _build_dice(self):
         """Place 5 dice in a horizontal row."""
@@ -365,26 +377,67 @@ class GameScreen:
             self._dice.append(Die(i, (cx, cy)))
 
     def _do_roll(self):
-        for die in self._dice:
-            die.start_shake()
+        # 1. เช็คว่าทอยครบ 3 ครั้งหรือยัง ถ้าครบห้ามทอยต่อ
+        if getattr(self, "_game", None) and self._game.roll_count >= 3:
+            return
+
+        # 2. เก็บดัชนีลูกที่ถูกล็อค
+        locked_indices = [i for i, die in enumerate(self._dice) if die.locked]
+
+        # 3. สั่งสุ่มลูกเต๋าที่ฝั่งระบบคิดเลข
+        new_faces = self._game.roll(locked_indices)
+
+        # 4. อัพเดทหน้าต่างให้ขยับ
+        for i, die in enumerate(self._dice):
+            die.start_shake(new_face=new_faces[i])
+            
         self._rolling = True
         self._roll_frames = 30
 
     def _next_turn(self):
-        n = len(self._tokens)
-        for t in self._tokens:
-            t.is_current = False
-        self._current_idx = (self._current_idx + 1) % n
-        # skip dead players
-        tries = 0
-        while self._tokens[self._current_idx].is_dead and tries < n:
-            self._current_idx = (self._current_idx + 1) % n
-            tries += 1
-        self._tokens[self._current_idx].is_current = True
+        if not getattr(self, "_game", None):
+            return
+
+        # 1. ให้สมองเกมจัดการคำนวณผลลัพธ์ลูกเต๋าทั้งหมด
+        result = self._game.end_turn()
+
+        # 2. เช็คว่ามีคนชนะหรือยัง
+        if result["is_game_over"]:
+            state = self._game.get_state()
+            winner_role = result["winner_role"]
+            winner_char = "unknown"
+            for p in state["players"]:
+                if (p["role"] == winner_role) or (winner_role == "Sheriff" and p["role"] == "Deputy"):
+                    if p["alive"]:
+                        winner_char = p["char_key"]
+                        break
+
+            self.manager.set_scene("result", data={
+                "players": state["players"],
+                "winner_char": winner_char,
+                "winner_role": winner_role
+            })
+            return
+
+        # 3. อัพเดทข้อมูล HP และสถานะผู้เล่นทุกคนบนหน้าจอ
+        state = self._game.get_state()
+        self._current_idx = state["current_player_idx"]
+        self._arrow_count = state["arrow_pile"]
+        
+        for i, p_state in enumerate(state["players"]):
+            self._tokens[i].hp = p_state["hp"]
+            self._tokens[i].is_dead = not p_state["alive"]
+            self._tokens[i].is_current = (i == self._current_idx)
+
         self._turn_anim_t = 0
-        # unlock all dice
+        
+        # 4. ปลดล็อคลูกเต๋าทุกลูกเพื่อเริ่มเทิร์นใหม่
         for die in self._dice:
             die.locked = False
+            die.face = "arrow" # รีเซ็ตหน้าเต๋ากลับเป็นค่าเริ่มต้น
+
+        # รีเซ็ตปุ่มคลิกทอย
+        self._btn_roll.disabled = False
 
     # ── Scene interface ──────────────────────────────────────────────────────
     def on_enter(self, data: dict):
@@ -403,6 +456,16 @@ class GameScreen:
         self._t += 1
         self._turn_anim_t += 1
 
+        if getattr(self, "_game", None):
+            self._btn_roll.disabled = (self._game.roll_count >= 3)
+            # ถ้ายังไม่เคยทอยลูกเต๋าเลยในเทิร์นนี้ บังคับห้ามกดจบเทิร์น
+            self._btn_end.disabled = (self._game.roll_count == 0)
+            
+            # ถ้าทอยครบโควต้า 3 ครั้งแล้ว บังคับล็อคลูกเต๋าทุกลูกทันที
+            if self._game.roll_count >= 3:
+                for die in self._dice:
+                    die.locked = True
+            
         for b in (self._btn_roll, self._btn_end,
                   self._btn_menu, self._btn_result):
             b.update()
@@ -513,8 +576,10 @@ class GameScreen:
                   get_font(15), C_GREY,
                   center=((SCREEN_W - self.RIGHT_W) // 2, strip_y - 14))
 
-        for die in self._dice:
-            die.draw(screen)
+        hide_dice = getattr(self, "_game", None) and self._game.roll_count == 0 and not self._rolling
+        if not hide_dice:
+            for die in self._dice:
+                die.draw(screen)
 
         # ── Dead players row (bottom) ─────────────────────────────────────
         dead = [t for t in self._tokens if t.is_dead]
@@ -565,7 +630,12 @@ class GameScreen:
             self._do_roll()
         if self._btn_end.is_clicked(event):
             self._next_turn()
-        for die in self._dice:
-            if die.is_clicked(event):
-                die.toggle_lock()
+        hide_dice = getattr(self, "_game", None) and self._game.roll_count == 0 and not self._rolling
+        if not hide_dice:
+            for die in self._dice:
+                if die.is_clicked(event):
+                    # ห้ามกดยกเลิกล็อคถ้าทอยครบ 3 ครั้งแล้ว
+                    if getattr(self, "_game", None) and self._game.roll_count >= 3:
+                        continue
+                    die.toggle_lock()
         self.handle_event_extra(event)
