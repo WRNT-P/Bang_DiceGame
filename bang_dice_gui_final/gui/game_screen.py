@@ -188,6 +188,15 @@ class PlayerToken:
     def update(self):
         self._t += 1
 
+    def is_clicked(self, event: pygame.event.Event) -> bool:
+        """ตรวจจับการคลิกเมาส์ซ้ายบนภาพ Portrait"""
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            r = self.PORT_SIZE // 2
+            rect = pygame.Rect(self.cx - r, self.cy - r, r * 2, r * 2)
+            if rect.collidepoint(event.pos):
+                return True
+        return False
+
     def draw(self, surface: pygame.Surface):
         t   = self._t
         r   = self.PORT_SIZE // 2
@@ -341,6 +350,16 @@ class GameScreen:
             color_normal=(70, 20, 60), color_hover=(110, 35, 90),
             border_color=(200, 80, 180))
 
+        # ── targeting buttons ────────────────────────────────────────────
+        self._btn_shoot_left = Button(
+            pygame.Rect(0, 0, 160, 45), "⬅ SHOOT LEFT", font_size=18,
+            color_normal=(120, 30, 30), color_hover=(180, 40, 40),
+            border_color=(250, 100, 100))
+        self._btn_shoot_right = Button(
+            pygame.Rect(0, 0, 160, 45), "SHOOT RIGHT ➔", font_size=18,
+            color_normal=(120, 30, 30), color_hover=(180, 40, 40),
+            border_color=(250, 100, 100))
+
     # ── helpers ─────────────────────────────────────────────────────────────
     def _build_tokens(self, num: int, char_keys: list, players_state: list):
         """Place player tokens in an elliptical ring around the table."""
@@ -356,7 +375,16 @@ class GameScreen:
             px     = int(cx + ell_rx * math.cos(angle))
             py     = int(cy + ell_ry * math.sin(angle))
             key    = char_keys[i] if i < len(char_keys) else random.choice(CHAR_FILES)
-            token  = PlayerToken(i, key, px, py, is_current=(i == 0))
+            
+            p_state = players_state[i] if i < len(players_state) else None
+            is_cur = p_state["is_current"] if p_state and "is_current" in p_state else (i == 0)
+            
+            token  = PlayerToken(i, key, px, py, is_current=is_cur)
+            if p_state:
+                token.role = p_state.get("role", "")
+                token.hp   = p_state.get("hp", 1)
+                token.hp_max = p_state.get("hp_max", 1)
+                
             self._tokens.append(token)
 
         # Assign Status from Backend
@@ -400,9 +428,22 @@ class GameScreen:
 
         # 1. ให้สมองเกมจัดการคำนวณผลลัพธ์ลูกเต๋าทั้งหมด
         result = self._game.end_turn()
+        self._process_game_result(result)
+
+    def _process_game_result(self, result: dict):
+        # ถ้าระบบบอกว่าติดโหมด Targeting ให้หยุดรอรับคลิกจากผู้เล่น
+        if result.get("status") == "targeting":
+            self._targeting_mode = True
+            self._pending_bangs = result
+            self._refresh_tokens()
+            self._btn_roll.disabled = True
+            self._btn_end.disabled = True
+            return
+            
+        self._targeting_mode = False
 
         # 2. เช็คว่ามีคนชนะหรือยัง
-        if result["is_game_over"]:
+        if result.get("is_game_over", False):
             state = self._game.get_state()
             winner_role = result["winner_role"]
             winner_char = "unknown"
@@ -419,16 +460,8 @@ class GameScreen:
             })
             return
 
-        # 3. อัพเดทข้อมูล HP และสถานะผู้เล่นทุกคนบนหน้าจอ
-        state = self._game.get_state()
-        self._current_idx = state["current_player_idx"]
-        self._arrow_count = state["arrow_pile"]
-        
-        for i, p_state in enumerate(state["players"]):
-            self._tokens[i].hp = p_state["hp"]
-            self._tokens[i].is_dead = not p_state["alive"]
-            self._tokens[i].is_current = (i == self._current_idx)
-
+        # 3. อัพเดทข้อมูลใหม่และเริ่มเทิร์นคนถัดไป
+        self._refresh_tokens()
         self._turn_anim_t = 0
         
         # 4. ปลดล็อคลูกเต๋าทุกลูกเพื่อเริ่มเทิร์นใหม่
@@ -438,6 +471,20 @@ class GameScreen:
 
         # รีเซ็ตปุ่มคลิกทอย
         self._btn_roll.disabled = False
+        
+    def _refresh_tokens(self):
+        """อัพเดท HP และคิวผู้เล่นปัจจุบันจาก Backend"""
+        if not getattr(self, "_game", None):
+            return
+        state = self._game.get_state()
+        self._current_idx = state["current_player_idx"]
+        self._arrow_count = state["arrow_pile"]
+        
+        for i, p_state in enumerate(state["players"]):
+            self._tokens[i].hp = p_state["hp"]
+            self._tokens[i].is_dead = not p_state["alive"]
+            self._tokens[i].is_current = (i == self._current_idx)
+            self._tokens[i].role = p_state.get("role", "")
 
     # ── Scene interface ──────────────────────────────────────────────────────
     def on_enter(self, data: dict):
@@ -451,6 +498,7 @@ class GameScreen:
         self._current_idx = state["current_player_idx"]
         self._arrow_count = state["arrow_pile"]
         self._turn_anim_t = 0
+        self._refresh_tokens()
 
     def update(self):
         self._t += 1
@@ -467,7 +515,8 @@ class GameScreen:
                     die.locked = True
             
         for b in (self._btn_roll, self._btn_end,
-                  self._btn_menu, self._btn_result):
+                  self._btn_menu, self._btn_result,
+                  self._btn_shoot_left, self._btn_shoot_right):
             b.update()
         for token in self._tokens:
             token.update()
@@ -610,6 +659,31 @@ class GameScreen:
                       center=((SCREEN_W - self.RIGHT_W) // 2,
                                self.DICE_Y - 55))
 
+        # ── Targeting HUD ───────────────────────────────────────────────────
+        if getattr(self, "_targeting_mode", False):
+            bang_info = getattr(self, "_pending_bangs", {})
+            b1 = bang_info.get("bang1", 0)
+            b2 = bang_info.get("bang2", 0)
+            req_dist = "Range 1 (Next to you)" if b1 > 0 else "Range 2"
+            qty = b1 if b1 > 0 else b2
+            msg = f"SELECT TARGET: {req_dist}  (Shots left: {qty})"
+            bg_rect = pygame.Rect(0, 0, 600, 50)
+            bg_rect.center = ((SCREEN_W - self.RIGHT_W) // 2, self.TABLE_CY)
+            pygame.draw.rect(screen, (20, 0, 0, 220), bg_rect, border_radius=16)
+            pygame.draw.rect(screen, C_RED, bg_rect, 2, border_radius=16)
+            draw_text(screen, msg, get_font(20, bold=True), C_WHITE,
+                      center=bg_rect.center)
+                      
+            # Draw targeting buttons
+            cx = bg_rect.centerx
+            self._btn_shoot_left.rect.centerx = cx - 100
+            self._btn_shoot_left.rect.y = self.TABLE_CY + 40
+            self._btn_shoot_left.draw(screen)
+            
+            self._btn_shoot_right.rect.centerx = cx + 100
+            self._btn_shoot_right.rect.y = self.TABLE_CY + 40
+            self._btn_shoot_right.draw(screen)
+
     def handle_event_extra(self, event):
         """Arrow +/- clicks — called from handle_event."""
         rp_x = SCREEN_W - self.RIGHT_W
@@ -622,6 +696,24 @@ class GameScreen:
                 self._arrow_count = max(0, self._arrow_count - 1)
 
     def handle_event(self, event: pygame.event.Event):
+        # ถ้าระบบเกมกำลังรอให้เราคลิกเลือกเป้าหมาย
+        if getattr(self, "_targeting_mode", False):
+            bang_info = getattr(self, "_pending_bangs", {})
+            b1 = bang_info.get("bang1", 0)
+            bang_type = "bang1" if b1 > 0 else "bang2"
+            
+            direction = None
+            if self._btn_shoot_left.is_clicked(event):
+                direction = "left"
+            elif self._btn_shoot_right.is_clicked(event):
+                direction = "right"
+                
+            if direction:
+                result = self._game.submit_bang_target(direction, bang_type)
+                if result.get("status") != "targeting_error":
+                    self._process_game_result(result)
+            return
+
         if self._btn_menu.is_clicked(event):
             self.manager.set_scene("menu")
         if self._btn_result.is_clicked(event):

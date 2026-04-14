@@ -32,6 +32,8 @@ class Game:
         self.arrow_pile:     int        = self.ARROW_TOTAL
         self.is_game_over:   bool       = False
         self.winner_role:    str | None = None
+        self.pending_bangs:  dict       = {}
+        self.pending_events: list[str]  = []
 
         self.players: list[Player] = [
             Player(name=f"Player {i + 1}", char_key=char_keys[i],
@@ -142,17 +144,27 @@ class Game:
             if results["beers"] > 0:
                 events.append(f"Beer x{results['beers']}")
 
-        # 5. Bang
+        # 5. Bang (รอการเล็งเป้าถ้ามีกระสุน)
         print("Step5 Execute")
-        if cp.alive:
-            alive = self.alive_players
-            if len(alive) > 1:
-                target = alive[(alive.index(cp) + 1) % len(alive)]
-                total_bang = results["bang1"] + results.get("bang2", 0) * 2
-                if total_bang > 0:
-                    target.take_damage(total_bang)
-                    events.append(f"Bang! {target.name} -HP")
+        bang1_count = results["bang1"]
+        bang2_count = results.get("bang2", 0)
+        
+        if cp.alive and (bang1_count > 0 or bang2_count > 0):
+            self.pending_bangs = {"bang1": bang1_count, "bang2": bang2_count}
+            self.pending_events = events
+            # รีเทิร์นว่าหยุดรอที่ targeting ยังไม่จบเทิร์นจริง
+            return {
+                "status": "targeting",
+                "bang1": bang1_count,
+                "bang2": bang2_count,
+                "events": events
+            }
 
+        # ถ้าไม่มีการยิงปืน ให้จบเทิร์นปกติ
+        return self._finish_turn(events, cp)
+
+    def _finish_turn(self, events: list[str], old_cp) -> dict:
+        """ทำงานส่วนท้ายสุดของเทิร์น (เช็คชนะ + รันลำดับ + รีเซ็ต)"""
         # 6. Check win condition
         print("Step6 Execute")
         winner = self.check_win()
@@ -174,13 +186,61 @@ class Game:
         self.roll_count = 0
         self.locked_indices = []
         self.dice_faces = ["arrow"] * 5
-        cp.dynamites = 0
+        old_cp.dynamites = 0
+        
+        self.pending_bangs = {}
+        self.pending_events = []
 
         return {
+            "status":          "finished",
             "next_player_idx": self.current_player_idx,
             "events":          events,
             "is_game_over":    self.is_game_over,
             "winner_role":     self.winner_role,
+        }
+
+    def submit_bang_target(self, direction: str, bang_type: str) -> dict:
+        """ยิงเป้าหมายตามทิศทาง Left/Right"""
+        cp = self.players[self.current_player_idx]
+        alive = self.alive_players
+        
+        if self.pending_bangs.get(bang_type, 0) <= 0:
+            return {"status": "targeting_error", "message": "ไม่มีกระสุนประเภทนี้แล้ว"}
+            
+        # สำรวจระยะ (Distance) แบบวงกลม
+        idx = alive.index(cp)
+        n = len(alive)
+        
+        req_dist = 1 if bang_type == "bang1" else 2
+        # กติกาพิเศษ: ถ้าเหลือคนรอด 3 คน ระยะ 2 จะหมายถึง 1 (เพราะทุกคนเป็น 1 หมด)
+        if req_dist == 2 and n <= 3:
+            req_dist = 1
+            
+        if direction == "left":
+            target_idx = (idx - req_dist) % n
+        else: # "right"
+            target_idx = (idx + req_dist) % n
+            
+        target = alive[target_idx]
+            
+        if not target.alive or target == cp:
+            return {"status": "targeting_error", "message": "เป้าหมายตายแล้ว หรือยิงตัวเองไม่ได้"}
+            
+        # ยิงสำเร็จ ลดเลือดและลดกระสุน
+        target.take_damage(1)
+        self.pending_events.append(f"Bang! {target.name} -1HP")
+        self.pending_bangs[bang_type] -= 1
+        
+        # เช็คว่ากระสุนทุกชนิดหมดกระเป๋าหรือยัง
+        if self.pending_bangs.get("bang1", 0) == 0 and self.pending_bangs.get("bang2", 0) == 0:
+            return self._finish_turn(self.pending_events, cp)
+            
+        # ถ้ายังไม่หมด ให้รีเทิร์นสถานะ targeting ต่อ
+        return {
+            "status": "targeting",
+            "bang1": self.pending_bangs.get("bang1", 0),
+            "bang2": self.pending_bangs.get("bang2", 0),
+            "events": self.pending_events
         }
 
     # ------------------------------------------------------------------

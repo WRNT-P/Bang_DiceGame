@@ -372,6 +372,55 @@
           "won": true
         }
       ]
+    },
+    {
+      "game_id": "8fe27c6b-4727-4b17-9857-d83541a41fb0",
+      "timestamp": "2026-04-14T20:23:22",
+      "num_players": 4,
+      "winner_role": "Sheriff",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "vultureS",
+          "char_key": "vultureS",
+          "role": "Sheriff",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": true
+        },
+        {
+          "name": "paulR",
+          "char_key": "paulR",
+          "role": "Deputy",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": true
+        },
+        {
+          "name": "elG",
+          "char_key": "elG",
+          "role": "Outlaw",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        },
+        {
+          "name": "blackJ",
+          "char_key": "blackJ",
+          "role": "Renegade",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        }
+      ]
     }
   ]
 }

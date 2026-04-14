@@ -7,7 +7,8 @@ test_game_init.py — Test suite สำหรับ game.py
 """
 
 import sys
-sys.path.insert(0, r'c:\Users\woraneti\Downloads\Bang_DiceGame\bang_dice_gui_final')
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bang_dice_gui_final'))
 from backend.game import Game
 
 # ─── ข้อมูลทดสอบที่ใช้ร่วมกัน ───────────────────────────────────────────────
