@@ -421,6 +421,104 @@
           "won": false
         }
       ]
+    },
+    {
+      "game_id": "c8500aa7-dba4-40b0-aaca-88deb45df11b",
+      "timestamp": "2026-04-15T15:12:22",
+      "num_players": 4,
+      "winner_role": "Sheriff",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "jesseJ",
+          "char_key": "jesseJ",
+          "role": "Sheriff",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": true
+        },
+        {
+          "name": "vultureS",
+          "char_key": "vultureS",
+          "role": "Deputy",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": true
+        },
+        {
+          "name": "jourdonnais",
+          "char_key": "jourdonnais",
+          "role": "Outlaw",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        },
+        {
+          "name": "roseD",
+          "char_key": "roseD",
+          "role": "Renegade",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        }
+      ]
+    },
+    {
+      "game_id": "1af3a132-1c5a-4f4a-8a9b-0c1d84747248",
+      "timestamp": "2026-04-15T15:20:12",
+      "num_players": 4,
+      "winner_role": "Outlaw",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "Player 1",
+          "char_key": "roseD",
+          "role": "Renegade",
+          "hp_final": 9,
+          "hp_max": 9,
+          "arrows_held": 0,
+          "survived": true,
+          "won": false
+        },
+        {
+          "name": "Player 2",
+          "char_key": "paulR",
+          "role": "Outlaw",
+          "hp_final": 9,
+          "hp_max": 9,
+          "arrows_held": 0,
+          "survived": true,
+          "won": true
+        },
+        {
+          "name": "Player 3",
+          "char_key": "jourdonnais",
+          "role": "Sheriff",
+          "hp_final": 0,
+          "hp_max": 9,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        },
+        {
+          "name": "Player 4",
+          "char_key": "pedroR",
+          "role": "Outlaw",
+          "hp_final": 8,
+          "hp_max": 8,
+          "arrows_held": 0,
+          "survived": true,
+          "won": true
+        }
+      ]
     }
   ]
 }

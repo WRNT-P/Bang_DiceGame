@@ -185,6 +185,10 @@ class PlayerToken:
         self.hp_max = 4
         self.hp     = 4
 
+        # Number of Arrow
+        self.arrows = 0
+
+
     def update(self):
         self._t += 1
 
@@ -270,6 +274,17 @@ class PlayerToken:
                                (cx - (self.hp_max - 1) * (pip_r + 3) // 2
                                 + i * (pip_r * 2 + 3), pip_y), pip_r, 1)
 
+        # Arrow icons
+        if self.arrows > 0 and getattr(self, "_arrow_img", None):
+            arr_y = pip_y + 14
+            spacing = 18
+            total_w = self.arrows * spacing - 2
+            start_x = cx - total_w // 2
+
+        for i in range(self.arrows):
+            ax = start_x + i * spacing
+            surface.blit(self._arrow_img, (ax, arr_y))
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  GameScreen
@@ -286,8 +301,8 @@ class GameScreen:
     TOP_H      = 80
     BOTTOM_H   = 110
     RIGHT_W    = 140
-    DICE_Y     = SCREEN_H - BOTTOM_H - 130   # dice strip y-center
-    TABLE_CY   = 290                         # player ring center-y
+    DICE_Y     = SCREEN_H - BOTTOM_H - 20   # dice strip y-center
+    TABLE_CY   = 280                         # player ring center-y
 
     def __init__(self):
         self._t            = 0
@@ -318,7 +333,8 @@ class GameScreen:
         # ── arrow icon ────────────────────────────────────────────────────
         arrow_path = os.path.join(IMG_DIR, "indian_arrow.png")
         self._arrow_icon = load_image(arrow_path, (36, 36))
-
+        self._arrow_icon_small = load_image(arrow_path, (16, 16))
+        
         # ── tombstone icon ────────────────────────────────────────────────
         tomb_path = os.path.join(IMG_DIR, "tombstone.png")
         self._tomb_icon = load_image(tomb_path, (48, 48))
@@ -380,6 +396,8 @@ class GameScreen:
             is_cur = p_state["is_current"] if p_state and "is_current" in p_state else (i == 0)
             
             token  = PlayerToken(i, key, px, py, is_current=is_cur)
+            token._arrow_img = self._arrow_icon_small
+
             if p_state:
                 token.role = p_state.get("role", "")
                 token.hp   = p_state.get("hp", 1)
@@ -392,6 +410,7 @@ class GameScreen:
             token.hp_max = players_state[i]["hp_max"]
             token.hp     = players_state[i]["hp"]
             token.role   = players_state[i]["role"]
+            token.arrows = players_state[i].get("arrows", 0)
 
     def _build_dice(self):
         """Place 5 dice in a horizontal row."""
@@ -485,6 +504,7 @@ class GameScreen:
             self._tokens[i].is_dead = not p_state["alive"]
             self._tokens[i].is_current = (i == self._current_idx)
             self._tokens[i].role = p_state.get("role", "")
+            self._tokens[i].arrows = p_state.get("arrows", 0)
 
     # ── Scene interface ──────────────────────────────────────────────────────
     def on_enter(self, data: dict):
