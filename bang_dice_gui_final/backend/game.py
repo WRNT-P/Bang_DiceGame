@@ -117,6 +117,9 @@ class Game:
         bang1_count = results["bang1"]
         bang2_count = results.get("bang2", 0)
         
+        if self.check_win() is not None or len(self.alive_players) <= 1:
+            return self._finish_turn(events, cp)
+
         if cp.alive and (bang1_count > 0 or bang2_count > 0):
             self.pending_bangs = {"bang1": bang1_count, "bang2": bang2_count}
             self.pending_events = events
@@ -189,6 +192,9 @@ class Game:
         self.pending_events.append(f"Bang! {target.name} -1HP")
         self.pending_bangs[bang_type] -= 1
         
+        if self.check_win() is not None or len(self.alive_players) <= 1:
+            return self._finish_turn(self.pending_events, cp)
+
         if self.pending_bangs.get("bang1", 0) == 0 and self.pending_bangs.get("bang2", 0) == 0:
             return self._finish_turn(self.pending_events, cp)
             

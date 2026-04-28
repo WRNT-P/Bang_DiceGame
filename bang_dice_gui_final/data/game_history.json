@@ -764,6 +764,113 @@
           "won": true
         }
       ]
+    },
+    {
+      "game_id": "71321f17-f0aa-435f-99c5-c883c9126901",
+      "timestamp": "2026-04-29T01:21:08",
+      "num_players": 4,
+      "winner_role": "Outlaw",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "Player 1",
+          "char_key": "vultureS",
+          "role": "Outlaw",
+          "hp_final": 2,
+          "hp_max": 9,
+          "arrows_held": 0,
+          "survived": true,
+          "won": true
+        },
+        {
+          "name": "Player 2",
+          "char_key": "blackJ",
+          "role": "Renegade",
+          "hp_final": 2,
+          "hp_max": 8,
+          "arrows_held": 2,
+          "survived": true,
+          "won": false
+        },
+        {
+          "name": "Player 3",
+          "char_key": "paulR",
+          "role": "Sheriff",
+          "hp_final": 0,
+          "hp_max": 11,
+          "arrows_held": 1,
+          "survived": false,
+          "won": false
+        },
+        {
+          "name": "Player 4",
+          "char_key": "jesseJ",
+          "role": "Outlaw",
+          "hp_final": 3,
+          "hp_max": 9,
+          "arrows_held": 0,
+          "survived": true,
+          "won": true
+        }
+      ]
+    },
+    {
+      "game_id": "492952ab-fdd4-4522-92ab-68bc8ed5025a",
+      "timestamp": "2026-04-29T01:22:15",
+      "num_players": 2,
+      "winner_role": "Renegade",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "Player 1",
+          "char_key": "willyTK",
+          "role": "Sheriff",
+          "hp_final": 0,
+          "hp_max": 10,
+          "arrows_held": 3,
+          "survived": false,
+          "won": false
+        },
+        {
+          "name": "Player 2",
+          "char_key": "jesseJ",
+          "role": "Renegade",
+          "hp_final": 9,
+          "hp_max": 9,
+          "arrows_held": 2,
+          "survived": true,
+          "won": true
+        }
+      ]
+    },
+    {
+      "game_id": "93b4db90-4967-4ca6-9fe8-ae521bbcd410",
+      "timestamp": "2026-04-29T01:23:35",
+      "num_players": 2,
+      "winner_role": "Sheriff",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "Player 1",
+          "char_key": "vultureS",
+          "role": "Sheriff",
+          "hp_final": 9,
+          "hp_max": 11,
+          "arrows_held": 0,
+          "survived": true,
+          "won": true
+        },
+        {
+          "name": "Player 2",
+          "char_key": "calamityJ",
+          "role": "Renegade",
+          "hp_final": 0,
+          "hp_max": 8,
+          "arrows_held": 1,
+          "survived": false,
+          "won": false
+        }
+      ]
     }
   ]
 }
