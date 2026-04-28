@@ -1,8 +1,4 @@
-"""
-lobby.py – Player-selection Lobby screen for Bang! Dice Game GUI.
 
-Allows 2-8 players to be added, each with a chosen character card.
-"""
 
 import pygame
 import math

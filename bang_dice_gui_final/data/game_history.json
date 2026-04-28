@@ -519,6 +519,251 @@
           "won": true
         }
       ]
+    },
+    {
+      "game_id": "5bea7ba0-70db-4f0d-9a25-b6daeafce965",
+      "timestamp": "2026-04-28T23:57:55",
+      "num_players": 4,
+      "winner_role": "Outlaw",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "Player 1",
+          "char_key": "willyTK",
+          "role": "Sheriff",
+          "hp_final": 0,
+          "hp_max": 10,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        },
+        {
+          "name": "Player 2",
+          "char_key": "pedroR",
+          "role": "Outlaw",
+          "hp_final": 7,
+          "hp_max": 8,
+          "arrows_held": 1,
+          "survived": true,
+          "won": true
+        },
+        {
+          "name": "Player 3",
+          "char_key": "sidK",
+          "role": "Renegade",
+          "hp_final": 6,
+          "hp_max": 8,
+          "arrows_held": 1,
+          "survived": true,
+          "won": false
+        },
+        {
+          "name": "Player 4",
+          "char_key": "blackJ",
+          "role": "Outlaw",
+          "hp_final": 8,
+          "hp_max": 8,
+          "arrows_held": 3,
+          "survived": true,
+          "won": true
+        }
+      ]
+    },
+    {
+      "game_id": "f25ee511-3bd1-4fdf-b314-ebf0ea5a8bbd",
+      "timestamp": "2026-04-28T23:58:38",
+      "num_players": 4,
+      "winner_role": "Outlaw",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "Player 1",
+          "char_key": "willyTK",
+          "role": "Sheriff",
+          "hp_final": 0,
+          "hp_max": 10,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        },
+        {
+          "name": "Player 2",
+          "char_key": "pedroR",
+          "role": "Outlaw",
+          "hp_final": 7,
+          "hp_max": 8,
+          "arrows_held": 1,
+          "survived": true,
+          "won": true
+        },
+        {
+          "name": "Player 3",
+          "char_key": "sidK",
+          "role": "Renegade",
+          "hp_final": 6,
+          "hp_max": 8,
+          "arrows_held": 1,
+          "survived": true,
+          "won": false
+        },
+        {
+          "name": "Player 4",
+          "char_key": "blackJ",
+          "role": "Outlaw",
+          "hp_final": 8,
+          "hp_max": 8,
+          "arrows_held": 3,
+          "survived": true,
+          "won": true
+        }
+      ]
+    },
+    {
+      "game_id": "83826701-7b58-4729-83cf-df5e1af6c854",
+      "timestamp": "2026-04-29T00:12:30",
+      "num_players": 4,
+      "winner_role": "Outlaw",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "Player 1",
+          "char_key": "calamityJ",
+          "role": "Outlaw",
+          "hp_final": 2,
+          "hp_max": 8,
+          "arrows_held": 0,
+          "survived": true,
+          "won": true
+        },
+        {
+          "name": "Player 2",
+          "char_key": "paulR",
+          "role": "Renegade",
+          "hp_final": 1,
+          "hp_max": 9,
+          "arrows_held": 0,
+          "survived": true,
+          "won": false
+        },
+        {
+          "name": "Player 3",
+          "char_key": "willyTK",
+          "role": "Outlaw",
+          "hp_final": 0,
+          "hp_max": 8,
+          "arrows_held": 0,
+          "survived": false,
+          "won": true
+        },
+        {
+          "name": "Player 4",
+          "char_key": "suzyL",
+          "role": "Sheriff",
+          "hp_final": 0,
+          "hp_max": 10,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        }
+      ]
+    },
+    {
+      "game_id": "5ca13238-e66a-479d-bf21-7ccf6b1bd5aa",
+      "timestamp": "2026-04-29T00:18:52",
+      "num_players": 4,
+      "winner_role": "Sheriff",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "vultureS",
+          "char_key": "vultureS",
+          "role": "Sheriff",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": true
+        },
+        {
+          "name": "roseD",
+          "char_key": "roseD",
+          "role": "Deputy",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": true
+        },
+        {
+          "name": "luckyD",
+          "char_key": "luckyD",
+          "role": "Outlaw",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        },
+        {
+          "name": "bartC",
+          "char_key": "bartC",
+          "role": "Renegade",
+          "hp_final": 0,
+          "hp_max": 1,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        }
+      ]
+    },
+    {
+      "game_id": "22db54c6-c310-44c6-8f3a-39638b1ed4fe",
+      "timestamp": "2026-04-29T00:30:23",
+      "num_players": 4,
+      "winner_role": "Outlaw",
+      "total_rounds": 0,
+      "players": [
+        {
+          "name": "Player 1",
+          "char_key": "willyTK",
+          "role": "Outlaw",
+          "hp_final": 8,
+          "hp_max": 8,
+          "arrows_held": 0,
+          "survived": true,
+          "won": true
+        },
+        {
+          "name": "Player 2",
+          "char_key": "kitC",
+          "role": "Renegade",
+          "hp_final": 7,
+          "hp_max": 7,
+          "arrows_held": 0,
+          "survived": true,
+          "won": false
+        },
+        {
+          "name": "Player 3",
+          "char_key": "blackJ",
+          "role": "Sheriff",
+          "hp_final": 0,
+          "hp_max": 10,
+          "arrows_held": 0,
+          "survived": false,
+          "won": false
+        },
+        {
+          "name": "Player 4",
+          "char_key": "slabTK",
+          "role": "Outlaw",
+          "hp_final": 8,
+          "hp_max": 8,
+          "arrows_held": 0,
+          "survived": true,
+          "won": true
+        }
+      ]
     }
   ]
 }

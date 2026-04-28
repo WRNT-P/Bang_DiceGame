@@ -1,6 +1,3 @@
-"""
-button.py – Reusable animated Button widget for Bang! Dice GUI.
-"""
 
 import pygame
 from .constants import (

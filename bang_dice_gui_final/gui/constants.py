@@ -1,8 +1,3 @@
-"""
-constants.py – Shared constants, colors, fonts, and utility helpers
-for the Bang! Dice Game GUI.
-"""
-
 import pygame
 import os
 
@@ -102,13 +97,15 @@ def load_image(path: str, size: tuple | None = None) -> pygame.Surface:
 
 # ── Draw helpers ─────────────────────────────────────────────────────────────
 def draw_text(surface: pygame.Surface, text: str, font: pygame.font.Font,
-              color, center=None, topleft=None):
+              color, center=None, topleft=None, topright=None):
     rendered = font.render(text, True, color)
     rect = rendered.get_rect()
     if center:
         rect.center = center
     elif topleft:
         rect.topleft = topleft
+    elif topright:
+        rect.topright = topright
     surface.blit(rendered, rect)
     return rect
 

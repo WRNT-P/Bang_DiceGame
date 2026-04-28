@@ -1,13 +1,3 @@
-"""
-game_screen.py – Main Gameplay screen for Bang! Dice Game GUI.
-
-Layout:
-  Top bar  – current player name + turn indicator
-  Center   – player portrait ring / row
-  Middle   – 5 dice (clickable to lock/unlock, Roll shakes them)
-  Right    – arrow counter
-  Bottom   – dead player tombstones + action buttons
-"""
 
 import pygame
 import math

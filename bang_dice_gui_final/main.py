@@ -22,6 +22,7 @@ from gui.menu        import MenuScreen, SceneManager
 from gui.lobby       import LobbyScreen
 from gui.game_screen import GameScreen
 from gui.result      import ResultScreen
+from gui.history     import HistoryScreen
 
 
 def main():
@@ -48,6 +49,7 @@ def main():
     manager.register("lobby",  LobbyScreen())
     manager.register("game",   GameScreen())
     manager.register("result", ResultScreen())
+    manager.register("history", HistoryScreen())
 
     # Start on the menu
     manager.set_scene("menu")

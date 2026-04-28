@@ -1,9 +1,4 @@
-"""
-menu.py – Main Menu screen + SceneManager for Bang! Dice Game GUI.
 
-SceneManager is the central controller that owns all screens and handles
-scene transitions.  Import and instantiate it in main.py.
-"""
 
 import pygame
 import math
@@ -145,10 +140,13 @@ class MenuScreen:
         bw2, bh2 = 260, 56
         cx = SCREEN_W // 2
         self._btn_start = Button(
-            pygame.Rect(cx - bw2 // 2, 390, bw2, bh2),
+            pygame.Rect(cx - bw2 // 2, 370, bw2, bh2),
             "▶  START GAME", font_size=24)
+        self._btn_history = Button(
+            pygame.Rect(cx - bw2 // 2, 445, bw2, bh2),
+            "📊  HISTORY", font_size=24)
         self._btn_exit  = Button(
-            pygame.Rect(cx - bw2 // 2, 465, bw2, bh2),
+            pygame.Rect(cx - bw2 // 2, 520, bw2, bh2),
             "✕  EXIT", font_size=24,
             color_normal=(60, 20, 15),
             color_hover=(100, 30, 20),
@@ -171,6 +169,8 @@ class MenuScreen:
     def handle_event(self, event: pygame.event.Event):
         if self._btn_start.is_clicked(event):
             self.manager.set_scene("lobby")
+        if self._btn_history.is_clicked(event):
+            self.manager.set_scene("history")
         if self._btn_exit.is_clicked(event):
             pygame.event.post(pygame.event.Event(pygame.QUIT))
 
@@ -179,6 +179,7 @@ class MenuScreen:
         for p in self._particles:
             p.update()
         self._btn_start.update()
+        self._btn_history.update()
         self._btn_exit.update()
 
     def draw(self, screen: pygame.Surface):
@@ -218,6 +219,7 @@ class MenuScreen:
 
         # Buttons
         self._btn_start.draw(screen)
+        self._btn_history.draw(screen)
         self._btn_exit.draw(screen)
 
         # Version

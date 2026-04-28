@@ -1,6 +1,3 @@
-"""
-result.py – Game Results / Winner screen for Bang! Dice Game GUI.
-"""
 
 import pygame
 import math
